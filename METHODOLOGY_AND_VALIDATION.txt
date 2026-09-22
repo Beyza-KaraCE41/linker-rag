@@ -1,0 +1,71 @@
+METHODOLOGY AND RESULTS
+Linker RAG: Retrieval-Augmented Generation Strategies for
+Conditional Transformer-Decoder-Based MOF Linker Design
+================================================================================
+
+PURPOSE
+--------------------------------------------------------------------------------
+This document accompanies the per-record data file
+(LINKER_RAG_FINAL_SUBMISSION.xlsx, 6,000 rows = 400 test x 3 seeds x 5 methods,
+including the No-RAG baseline). All metrics are computed directly from the
+released code on the true/generated linker SMILES; every value in the summary
+tables can be reproduced from the per-record data.
+
+A. METRIC DEFINITIONS 
+--------------------------------------------------------------------------------
+MACCS Similarity : 167-bit MACCS keys (RDKit), Tanimoto coefficient between the
+                   true and generated linker fingerprints.
+MCS Similarity   : RDKit rdFMCS (CompareElements/CompareOrder, ringMatchesRingOnly,
+                   completeRingsOnly), scored 0.60*atom_cov + 0.40*bond_cov.
+Flexible Match   : s_flex = max(s_MACCS, s_MCS), thresholded at
+                   tau in {0.50, 0.60, 0.70, 0.85, 0.90}.
+Multi-linker     : order-independent optimal one-to-one component assignment.
+Validity         : fraction of generated outputs RDKit parses and sanitizes.
+Novelty          : fraction of valid generated linkers absent from the
+                   seed-specific training partition.
+
+B. HYPERPARAMETER SELECTION 
+--------------------------------------------------------------------------------
+Fixed a priori, identical across all methods and all three seeds (SEED_EPOCHS,
+SEED_PARAMS in the code):
+    Training epochs (EPOCHS):          145
+    Retrieval pool size (POOL):        380
+    Final top-K retrieval budget (K):  90
+These are fixed by design, not tuned; none was selected using the held-out test
+set. GraphRAG's graph_k/hops and Self-RAG's reflection margin are chosen by a
+training-only leave-one-out procedure (test set never accessed).
+
+C. EXPERIMENTAL CONFIGURATION
+--------------------------------------------------------------------------------
+Frozen (common) test set: a single held-out set of 400 canonical-linker-disjoint
+records is produced by a FROZEN split (fixed split seed = 42) and is IDENTICAL
+across all methods and all three model seeds, so every method is evaluated on
+exactly the same 400 held-out linkers (train/test overlap = 0). Property error
+is stored per test row using an explicit Test_Index, so error values are aligned
+to their own molecule (no indexing shift). The No-RAG baseline (same decoder,
+no retrieval) is included as a reference.
+
+D. RESULTS (frozen test set, 400 records, mean over 3 seeds, tau = 0.50)
+--------------------------------------------------------------------------------
+
+Method         Match Count (of 400)   Mean MACCS   Mean MCS   Valid.(%)   Novel.(%)
+Self-RAG       258.0                  0.585        0.446      91.0        66.4
+GraphRAG       202.0                  0.500        0.373      84.1        59.2
+HyDE-RAG       200.0                  0.500        0.381      84.3        60.2
+Vanilla-RAG    153.3                  0.420        0.304      77.0        54.0
+NO-RAG         55.0                   0.253        0.169      60.6        42.0
+
+Ranking (match count): Self-RAG > GraphRAG ~ HyDE-RAG > Vanilla-RAG > No-RAG.
+All four RAG variants exceed the No-RAG baseline at tau = 0.50, and the ordering
+is stable across seeds.
+
+E. REPRODUCIBILITY
+--------------------------------------------------------------------------------
+  - Code: VANILLA2.py, HYDE2.py, GRAPH2.py, SELF2.py (identical metric functions;
+    frozen split; training-only hyperparameter selection; No-RAG baseline).
+  - Per-record data (all methods/seeds, with True/Generated SMILES):
+    DOCUMENTATION/LINKER_RAG_FINAL_SUBMISSION.xlsx and
+    RAW_DATA/RAW_INFERENCE_METHOD_SEEDS.csv (6,000 rows).
+  - Summary tables: SUMMARY_TABLES/TABLE_1_GENERAL_PERFORMANCE_0.50.csv,
+    TABLE_2_MULTI_THRESHOLD.csv (means +/- sample std, ddof=1).
+  - Threshold list everywhere: 0.50, 0.60, 0.70, 0.85, 0.90.
