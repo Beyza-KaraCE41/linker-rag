@@ -7,7 +7,8 @@ paper.
 
 The framework couples a single shared **Conditional Transformer Decoder (CTD)**
 backbone (graph encoder + property encoder + forward model + decoder) with four
-retrieval strategies — **Vanilla Latent-RAG, HyDE-RAG, GraphRAG, Self-RAG** — and
+retrieval strategies — **Vanilla Latent-RAG, HyDE-RAG, GraphRAG, Self-RAG** (called
+**R-RAG, Reflective RAG** in the paper; the code and data files use the name Self-RAG) — and
 compares them against a **No-RAG** generative baseline for predicting MOF linkers
 from MOF properties, using the [Quantum MOF (QMOF) database](https://github.com/Andrew-S-Rosen/QMOF).
 
@@ -40,6 +41,7 @@ METHODOLOGY_AND_VALIDATION.txt        # metric definitions + final results
 | Optimizer | AdamW, lr = 3e-4, CosineAnnealingLR |
 | Retrieval pool | 380 |
 | Final top-K | 90 |
+| Reflection margin (Self-RAG / R-RAG) | fixed, m = 0 |
 | Random seeds | 42, 123, 999 |
 | Held-out test set | 400 canonical-linker-disjoint records (fixed split seed = 42) |
 | Flexible match | s_flex = max(MACCS Tanimoto, MCS coverage) |
@@ -65,11 +67,12 @@ Reported match rates are the **single final predicted linker per test molecule
 - `rdkit`
 - `selfies`
 - `numpy`, `pandas`, `tqdm`
+- `scikit-learn`, `matplotlib`
 
 Install (example):
 
 ```bash
-pip install torch torch-geometric rdkit selfies numpy pandas tqdm
+pip install torch torch-geometric rdkit selfies numpy pandas tqdm scikit-learn matplotlib
 ```
 
 ## Data
@@ -98,9 +101,9 @@ python CODES/SELF2.py
 
 ## Citation
 
-If you use this code or data, please cite the paper (and this repository / its
-archived DOI once available).
+If you use this code or data, please cite the paper and the archived release:
+https://doi.org/10.5281/zenodo.22895463
 
 ## License
 
-Released for academic use. See `LICENSE` (add your preferred license, e.g. MIT).
+For academic use. Please contact the authors regarding reuse.
