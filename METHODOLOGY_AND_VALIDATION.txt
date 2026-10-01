@@ -21,8 +21,9 @@ Flexible Match   : s_flex = max(s_MACCS, s_MCS), thresholded at
                    tau in {0.50, 0.60, 0.70, 0.85, 0.90}.
 Multi-linker     : order-independent optimal one-to-one component assignment.
 Validity         : fraction of generated outputs RDKit parses and sanitizes.
-Novelty          : fraction of valid generated linkers absent from the
-                   seed-specific training partition.
+Novelty          : fraction of ALL generated outputs (n = 400 per seed) that
+                   are valid and absent from the seed-specific training
+                   partition (denominator = all 400 outputs).
 
 B. HYPERPARAMETER SELECTION 
 --------------------------------------------------------------------------------
@@ -32,8 +33,9 @@ SEED_PARAMS in the code):
     Retrieval pool size (POOL):        380
     Final top-K retrieval budget (K):  90
 These are fixed by design, not tuned; none was selected using the held-out test
-set. GraphRAG's graph_k/hops and Self-RAG's reflection margin are chosen by a
-training-only leave-one-out procedure (test set never accessed).
+set. GraphRAG's graph_k/hops are chosen by a training-only leave-one-out
+procedure (test set never accessed). Self-RAG's reflection margin is fixed a
+priori at m = 0 (no margin tuning).
 
 C. EXPERIMENTAL CONFIGURATION
 --------------------------------------------------------------------------------
