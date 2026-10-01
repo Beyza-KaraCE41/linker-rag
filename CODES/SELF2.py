@@ -1034,7 +1034,8 @@ def run_self_rag(test_df, feat_cols, gnn, gen, dit, fwd,
                 retrieved_pred = fwd(retrieved_z)
                 retrieved_err = torch.norm(retrieved_pred-p, p=2).item()
 
-            # Reflection margin is selected on training-only data.
+            # Reflection margin is fixed a priori at m = 0 (see main loop);
+            # no margin tuning is performed for the reported results.
             use_retrieval = retrieved_err + reflection_margin < no_rag_err
 
             if use_retrieval:
@@ -1135,9 +1136,13 @@ def _sample_train_indices(n, max_items=512, seed=42):
 
 def tune_self_reflection_margin(train_latents, train_props, fwd, seed):
     """
-    The reflection margin is not manually assigned.
-    Candidate margins are empirical quantiles of the TRAIN-ONLY difference
-    between retrieved and no-RAG predicted property error.
+    NOTE: NOT USED in the reported experiments. The reflection margin is
+    fixed a priori at m = 0 (reflection_margin=0.0 in the main loop), and
+    this function is never called. It is kept only for reference.
+
+    Optional train-only margin search: candidate margins are empirical
+    quantiles of the TRAIN-ONLY difference between retrieved and no-RAG
+    predicted property error.
     """
     idxs = _sample_train_indices(len(train_latents), seed=seed)
     diffs = []
